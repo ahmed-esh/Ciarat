@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
     <title>AR Car Experience</title>
     <style>
         body {
@@ -43,8 +44,14 @@
     <script type="module">
         import ARCarExperience from './ar-experience.js';
         
-        document.addEventListener('DOMContentLoaded', () => {
-            const arExperience = new ARCarExperience();
+        window.addEventListener('load', () => {
+            try {
+                console.log('Initializing AR experience...');
+                const arExperience = new ARCarExperience();
+            } catch (error) {
+                console.error('Error initializing AR:', error);
+                alert('Error initializing AR: ' + error.message);
+            }
         });
     </script>
 </body>

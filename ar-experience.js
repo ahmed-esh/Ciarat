@@ -1,6 +1,6 @@
-import * as THREE from 'three';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import { ARButton } from 'three/examples/jsm/webxr/ARButton.js';
+import * as THREE from '/node_modules/three/build/three.module.js';
+import { GLTFLoader } from '/node_modules/three/examples/jsm/loaders/GLTFLoader.js';
+import { ARButton } from '/node_modules/three/examples/jsm/webxr/ARButton.js';
 
 class ARCarExperience {
     constructor() {
@@ -14,6 +14,9 @@ class ARCarExperience {
         this.hitTestSourceRequested = false;
         
         this.init();
+        
+        // Add error handler for WebGL
+        this.checkWebGLSupport();
     }
 
     init() {
@@ -70,10 +73,28 @@ class ARCarExperience {
         });
     }
 
+    checkWebGLSupport() {
+        if (!this.renderer.capabilities.isWebGL2) {
+            console.warn('WebGL 2 not supported');
+            this.showErrorMessage('WebGL 2 is not supported on this device');
+            return false;
+        }
+        return true;
+    }
+
     setupAR() {
+        console.log('Setting up AR...');
+        
         // Check if WebXR is supported
-        if ('xr' in navigator) {
-            navigator.xr.isSessionSupported('immersive-ar').then((supported) => {
+        if (!navigator.xr) {
+            console.error('WebXR not supported');
+            this.showErrorMessage('WebXR is not supported in this browser');
+            return;
+        }
+
+        navigator.xr.isSessionSupported('immersive-ar')
+            .then((supported) => {
+                console.log('AR supported:', supported);
                 if (supported) {
                     const sessionInit = {
                         requiredFeatures: ['hit-test'],
@@ -82,48 +103,63 @@ class ARCarExperience {
                     };
 
                     // Create and add AR button
-                    const arButton = ARButton.createButton(this.renderer, sessionInit);
+                    const arButton = ARButton.createButton(this.renderer, {
+                        ...sessionInit,
+                        onSessionStarted: (session) => {
+                            console.log('AR session started');
+                            this.onSessionStart(session);
+                        },
+                        onSessionEnded: () => {
+                            console.log('AR session ended');
+                            this.onSessionEnd();
+                        }
+                    });
+                    
+                    arButton.addEventListener('click', () => {
+                        console.log('AR button clicked');
+                    });
+                    
                     document.body.appendChild(arButton);
                 } else {
-                    console.warn('AR not supported on this device');
-                    this.showARNotSupportedMessage();
+                    this.showErrorMessage('AR not supported on this device');
                 }
+            })
+            .catch((error) => {
+                console.error('Error checking AR support:', error);
+                this.showErrorMessage('Error initializing AR: ' + error.message);
             });
-        } else {
-            console.warn('WebXR not available');
-            this.showARNotSupportedMessage();
-        }
-
-        // Handle XR session
-        this.renderer.xr.addEventListener('sessionstart', () => {
-            this.onSessionStart();
-        });
-
-        this.renderer.xr.addEventListener('sessionend', () => {
-            this.onSessionEnd();
-        });
-
-        // Start animation loop
-        this.renderer.setAnimationLoop((timestamp, frame) => this.animate(timestamp, frame));
     }
 
-    showARNotSupportedMessage() {
-        const message = document.createElement('div');
-        message.style.position = 'fixed';
-        message.style.top = '50%';
-        message.style.left = '50%';
-        message.style.transform = 'translate(-50%, -50%)';
-        message.style.background = 'rgba(0,0,0,0.8)';
-        message.style.color = 'white';
-        message.style.padding = '20px';
-        message.style.borderRadius = '10px';
-        message.style.textAlign = 'center';
-        message.innerHTML = 'AR is not supported on this device or browser.<br>Please use an AR-capable device with a supported browser.';
-        document.body.appendChild(message);
+    showErrorMessage(message) {
+        const errorDiv = document.createElement('div');
+        errorDiv.style.position = 'fixed';
+        errorDiv.style.top = '50%';
+        errorDiv.style.left = '50%';
+        errorDiv.style.transform = 'translate(-50%, -50%)';
+        errorDiv.style.background = 'rgba(255,0,0,0.8)';
+        errorDiv.style.color = 'white';
+        errorDiv.style.padding = '20px';
+        errorDiv.style.borderRadius = '10px';
+        errorDiv.style.textAlign = 'center';
+        errorDiv.style.zIndex = '1000';
+        errorDiv.innerHTML = message;
+        document.body.appendChild(errorDiv);
     }
 
-    onSessionStart() {
+    onSessionStart(session) {
+        console.log('Starting AR session...');
         this.scene.add(this.reticle);
+        
+        // Setup hit testing
+        session.requestReferenceSpace('viewer').then((referenceSpace) => {
+            console.log('Got viewer reference space');
+            session.requestHitTestSource({ space: referenceSpace })
+                .then((source) => {
+                    console.log('Got hit test source');
+                    this.hitTestSource = source;
+                })
+                .catch(error => console.error('Error requesting hit test source:', error));
+        });
     }
 
     onSessionEnd() {
