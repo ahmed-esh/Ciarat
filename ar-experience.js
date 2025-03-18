@@ -1,6 +1,6 @@
-import * as THREE from '/node_modules/three/build/three.module.js';
-import { GLTFLoader } from '/node_modules/three/examples/jsm/loaders/GLTFLoader.js';
-import { ARButton } from '/node_modules/three/examples/jsm/webxr/ARButton.js';
+import * as THREE from './node_modules/three/build/three.module.js';
+import { GLTFLoader } from './node_modules/three/examples/jsm/loaders/GLTFLoader.js';
+import { ARButton } from './node_modules/three/examples/jsm/webxr/ARButton.js';
 
 class ARCarExperience {
     constructor() {
@@ -61,7 +61,7 @@ class ARCarExperience {
         const carModels = ['car1.gltf', 'car2.gltf', 'car3.gltf'];
         carModels.forEach(modelPath => {
             loader.load(
-                `/models/${modelPath}`,
+                `./models/${modelPath}`,
                 (gltf) => {
                     const model = gltf.scene;
                     model.scale.set(0.5, 0.5, 0.5);
