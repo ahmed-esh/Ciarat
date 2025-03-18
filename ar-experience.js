@@ -71,14 +71,28 @@ class ARCarExperience {
     }
 
     setupAR() {
-        const sessionInit = {
-            requiredFeatures: ['hit-test'],
-            optionalFeatures: ['dom-overlay'],
-            domOverlay: { root: document.getElementById('ar-overlay') }
-        };
+        // Check if WebXR is supported
+        if ('xr' in navigator) {
+            navigator.xr.isSessionSupported('immersive-ar').then((supported) => {
+                if (supported) {
+                    const sessionInit = {
+                        requiredFeatures: ['hit-test'],
+                        optionalFeatures: ['dom-overlay'],
+                        domOverlay: { root: document.getElementById('ar-overlay') }
+                    };
 
-        // Add AR button
-        document.body.appendChild(ARButton.createButton(this.renderer, sessionInit));
+                    // Create and add AR button
+                    const arButton = ARButton.createButton(this.renderer, sessionInit);
+                    document.body.appendChild(arButton);
+                } else {
+                    console.warn('AR not supported on this device');
+                    this.showARNotSupportedMessage();
+                }
+            });
+        } else {
+            console.warn('WebXR not available');
+            this.showARNotSupportedMessage();
+        }
 
         // Handle XR session
         this.renderer.xr.addEventListener('sessionstart', () => {
@@ -91,6 +105,21 @@ class ARCarExperience {
 
         // Start animation loop
         this.renderer.setAnimationLoop((timestamp, frame) => this.animate(timestamp, frame));
+    }
+
+    showARNotSupportedMessage() {
+        const message = document.createElement('div');
+        message.style.position = 'fixed';
+        message.style.top = '50%';
+        message.style.left = '50%';
+        message.style.transform = 'translate(-50%, -50%)';
+        message.style.background = 'rgba(0,0,0,0.8)';
+        message.style.color = 'white';
+        message.style.padding = '20px';
+        message.style.borderRadius = '10px';
+        message.style.textAlign = 'center';
+        message.innerHTML = 'AR is not supported on this device or browser.<br>Please use an AR-capable device with a supported browser.';
+        document.body.appendChild(message);
     }
 
     onSessionStart() {
