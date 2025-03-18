@@ -1,0 +1,17 @@
+{
+  "dependencies": {
+    "three": "^0.174.0",
+    "vite": "^6.2.2"
+  },
+  "name": "testing-3d-modles-desing-",
+  "version": "1.0.0",
+  "description": "",
+  "main": "ar-experience.js",
+  "scripts": {
+    "dev": "vite"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs"
+}

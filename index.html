@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AR Car Experience</title>
+    <script src="https://unpkg.com/three@0.139.2/build/three.min.js"></script>
+    <script src="https://unpkg.com/three@0.139.2/examples/js/libs/stats.min.js"></script>
+    <script src="https://unpkg.com/three@0.139.2/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://unpkg.com/three@0.139.2/examples/js/webxr/ARButton.js"></script>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+        #ar-overlay {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border-radius: 5px;
+            font-family: Arial, sans-serif;
+            pointer-events: none;
+        }
+        .ar-button {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 12px 24px;
+            background: #007AFF;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div id="ar-overlay">
+        <h2>AR Car Experience</h2>
+        <p>Tap on a surface to place the car</p>
+    </div>
+    <script type="module">
+        import ARCarExperience from './ar-experience.js';
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            const arExperience = new ARCarExperience();
+        });
+    </script>
+</body>
+</html> 
